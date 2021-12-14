@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.fields import TextField
 from django.utils import timezone
 
-class User(models.Model):
+""" class User(models.Model):
     options = (
         ('unauthorized', 'Unauthorized'),
         ('authorized', 'Authorized')
@@ -47,7 +47,7 @@ class User(models.Model):
         ordering = ('-unauthorized')
 
         def __str__(self) -> str:
-            return self.name
+            return self.name """
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -56,7 +56,7 @@ class Category(models.Model):
         return self.name
 
 class Post(models.Model):
-    
+
     class PostObjects(models.Manager):
         def get_queryset(self):
             return super().get_queryset().filter(status='published')
@@ -74,3 +74,11 @@ class Post(models.Model):
     published = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
     status = models.CharField(max_length=10, choices=options, default='published')
+    objects = models.Manager() # default manager
+    postobjects = PostObjects() # custom manager
+
+    class Meta:
+        ordering = ('-published',)
+
+    def __str__(self) -> str:
+        return self.title
