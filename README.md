@@ -1,6 +1,6 @@
 ** DRAFT **
 
-** STEPS
+*** STEPS
 
 - 1. Execute: `py -m venv venn`
 - 2. Install django: `pip install django`
