@@ -14,13 +14,13 @@ class PostUserWritePermission(BasePermission):
 
 
 class PostList(generics.ListCreateAPIView):
-    permission_classes = (IsAdminUser|IsAuthenticated, ) # isAdmin or ...
+    # permission_classes = (IsAdminUser|IsAuthenticated, ) # isAdmin or ...
     queryset = Post.postobjects.all() # return all Posts that are flagged as 'published' -> check Model Post -> PostObjetcs
     serializer_class = PostSerializer
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView, PostUserWritePermission):
-    permission_classes = [PostUserWritePermission] # isAdmin or ...
-    queryset = Post.objects.all() # return all Posts that are flagged as 'published' -> check Model Post -> PostObjetcs
+    permission_classes = [PostUserWritePermission]
+    queryset = Post.objects.all() # return all Posts
     serializer_class = PostSerializer
 
 """
