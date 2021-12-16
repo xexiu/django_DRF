@@ -1,17 +1,27 @@
 from rest_framework import generics
 from blog.models import Post
 from .serializers import PostSerializer
+from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAdminUser, DjangoModelPermissions, IsAuthenticated
+
+# https://www.django-rest-framework.org/api-guide/permissions/
+
+class PostUserWritePermission(BasePermission):
+    message = 'Editing posts is restricted to the author only!'
+
+    def has_object_permission(self, request, view, obj):
+        # obj -> Post Object
+        return obj.author == request.user or IsAdminUser.has_permission(self, request, view)
 
 
 class PostList(generics.ListCreateAPIView):
+    permission_classes = (IsAdminUser|IsAuthenticated, ) # isAdmin or ...
     queryset = Post.postobjects.all() # return all Posts that are flagged as 'published' -> check Model Post -> PostObjetcs
     serializer_class = PostSerializer
-    pass
 
-class PostDetail(generics.RetrieveDestroyAPIView):
-    queryset = Post.postobjects.all() # return all Posts that are flagged as 'published' -> check Model Post -> PostObjetcs
+class PostDetail(generics.RetrieveUpdateDestroyAPIView, PostUserWritePermission):
+    permission_classes = [PostUserWritePermission] # isAdmin or ...
+    queryset = Post.objects.all() # return all Posts that are flagged as 'published' -> check Model Post -> PostObjetcs
     serializer_class = PostSerializer
-    pass
 
 """
 #### PERMISSIONS ####
