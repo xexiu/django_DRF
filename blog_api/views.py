@@ -1,9 +1,16 @@
-from rest_framework import generics
 from blog.models import Post
-from .serializers import PostSerializer
-from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAdminUser, DjangoModelPermissions, IsAuthenticated
+from django.shortcuts import get_object_or_404, get_list_or_404
+from rest_framework import generics, viewsets
+from rest_framework.permissions import (SAFE_METHODS, AllowAny, BasePermission,
+                                        DjangoModelPermissions, IsAdminUser,
+                                        IsAuthenticated)
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+from .serializers import MyTokenObtainPairSerializer, PostSerializer
 
 # https://www.django-rest-framework.org/api-guide/permissions/
+
 
 class PostUserWritePermission(BasePermission):
     message = 'Editing posts is restricted to the author only!'
@@ -13,15 +20,63 @@ class PostUserWritePermission(BasePermission):
         return obj.author == request.user or IsAdminUser.has_permission(self, request, view)
 
 
-class PostList(generics.ListCreateAPIView):
-    # permission_classes = (IsAdminUser|IsAuthenticated, ) # isAdmin or ...
-    queryset = Post.postobjects.all() # return all Posts that are flagged as 'published' -> check Model Post -> PostObjetcs
-    serializer_class = PostSerializer
+# class PostList(viewsets.ModelViewSet):
+#     permission_classes = [PostUserWritePermission]
+#     serializer_class = PostSerializer
 
-class PostDetail(generics.RetrieveUpdateDestroyAPIView, PostUserWritePermission):
+#     def get_object(self, queryset=None, **kwargs):
+#         item = self.kwargs.get('pk')
+#         print('Post Item: ', item)
+#         return get_list_or_404(Post, slug=item)
+
+#     # Define Custom Queryset
+#     def get_queryset(self):
+#         return Post.objects.all()
+
+
+class PostList(viewsets.ViewSet):
     permission_classes = [PostUserWritePermission]
-    queryset = Post.objects.all() # return all Posts
-    serializer_class = PostSerializer
+    queryset = Post.postobjects.all()
+
+    def list(self, request):
+        serializer_class = PostSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
+
+    def create(self, request):
+        pass
+
+    def retrieve(self, request, pk=None):
+        post = get_object_or_404(self.queryset, slug=pk)
+        serializer_class = PostSerializer(post)
+        return Response(serializer_class.data)
+
+    def update(self, request, pk=None):
+        pass
+
+    def partial_update(self, request, pk=None):
+        pass
+
+    def destroy(self, request, pk=None):
+        pass
+
+    pass
+
+
+# class PostList(generics.ListCreateAPIView):
+#     permission_classes = [IsAuthenticated] # isAdmin or ...
+#     queryset = Post.postobjects.all() # return all Posts that are flagged as 'published' -> check Model Post -> PostObjetcs
+#     serializer_class = PostSerializer
+
+# class PostDetail(generics.RetrieveUpdateDestroyAPIView, PostUserWritePermission):
+#     permission_classes = [PostUserWritePermission]
+#     queryset = Post.objects.all() # return all Posts
+#     serializer_class = PostSerializer
+
+class MyObtainTokenPairView(TokenObtainPairView):
+    permission_classes = (AllowAny,)
+    serializer_class = MyTokenObtainPairSerializer
+    print('HEYYY Token from MyObtainTokenPairView', serializer_class)
+
 
 """
 #### PERMISSIONS ####
