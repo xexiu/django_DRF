@@ -20,46 +20,43 @@ class PostUserWritePermission(BasePermission):
         return obj.author == request.user or IsAdminUser.has_permission(self, request, view)
 
 
-# class PostList(viewsets.ModelViewSet):
-#     permission_classes = [PostUserWritePermission]
-#     serializer_class = PostSerializer
-
-#     def get_object(self, queryset=None, **kwargs):
-#         item = self.kwargs.get('pk')
-#         print('Post Item: ', item)
-#         return get_list_or_404(Post, slug=item)
-
-#     # Define Custom Queryset
-#     def get_queryset(self):
-#         return Post.objects.all()
-
-
-class PostList(viewsets.ViewSet):
-    permission_classes = [PostUserWritePermission]
+class PostList(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
+    serializer_class = PostSerializer
     queryset = Post.postobjects.all()
 
-    def list(self, request):
-        serializer_class = PostSerializer(self.queryset, many=True)
-        return Response(serializer_class.data)
+    def get_object(self, queryset=None, **kwargs):
+        item_id = self.kwargs.get('pk')
+        print('Post Item: ', item_id)
+        return get_object_or_404(self.queryset, id=item_id)
 
-    def create(self, request):
-        pass
 
-    def retrieve(self, request, pk=None):
-        post = get_object_or_404(self.queryset, slug=pk)
-        serializer_class = PostSerializer(post)
-        return Response(serializer_class.data)
+# class PostList(viewsets.ViewSet):
+#     permission_classes = [PostUserWritePermission]
+#     queryset = Post.postobjects.all()
 
-    def update(self, request, pk=None):
-        pass
+#     def list(self, request):
+#         serializer_class = PostSerializer(self.queryset, many=True)
+#         return Response(serializer_class.data)
 
-    def partial_update(self, request, pk=None):
-        pass
+#     def create(self, request):
+#         pass
 
-    def destroy(self, request, pk=None):
-        pass
+#     def retrieve(self, request, pk=None):
+#         post = get_object_or_404(self.queryset, slug=pk)
+#         serializer_class = PostSerializer(post)
+#         return Response(serializer_class.data)
 
-    pass
+#     def update(self, request, pk=None):
+#         pass
+
+#     def partial_update(self, request, pk=None):
+#         pass
+
+#     def destroy(self, request, pk=None):
+#         pass
+
+#     pass
 
 
 # class PostList(generics.ListCreateAPIView):
