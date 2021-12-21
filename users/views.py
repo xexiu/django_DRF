@@ -6,7 +6,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import CustomUserSerializer
 
-
 class CustomUserCreate(APIView):
     permission_classes = [AllowAny]
 
