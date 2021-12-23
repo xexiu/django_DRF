@@ -1,6 +1,6 @@
 from blog.models import Post
 from django.shortcuts import get_list_or_404, get_object_or_404
-from rest_framework import generics, viewsets, filters
+from rest_framework import filters, generics, viewsets
 from rest_framework.permissions import (SAFE_METHODS, AllowAny, BasePermission,
                                         DjangoModelPermissions, IsAdminUser,
                                         IsAuthenticated)
@@ -19,43 +19,60 @@ class PostUserWritePermission(BasePermission):
         # obj -> Post Object
         return obj.author == request.user or IsAdminUser.has_permission(self, request, view)
 
+
 class PostList(generics.ListAPIView):
-    print('HEYYYYY AUTH')
     permission_classes = [IsAuthenticated]
     serializer_class = PostSerializer
     queryset = Post.postobjects.all()
 
 
-class PostDetail(generics.ListAPIView):
+class PostDetail(generics.RetrieveAPIView):
+    permission_classes = [PostUserWritePermission and IsAuthenticated]
     serializer_class = PostSerializer
-    lookup_field = 'slug'
 
-    def get_queryset(self):
-        slug = self.request.query_params.get('slug', None)
-        print('SLUG:', slug)
-        return Post.objects.filter(slug=slug)
+    def get_object(self, queryset=None, **kwargs):
+        item = self.kwargs.get('pk')
+        return get_object_or_404(Post, id=item)
 
 
-class PostListDetailfilter(generics.ListAPIView):
-
+class PostSearch(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    ordering_fields = ['title', 'id'] # order by this fields
+    ordering = ['title'] # order by default -> in this case, order by 'title'
     search_fields = ['^slug']
-
     # '^' Starts-with search.
     # '=' Exact matches.
     # '@' Full-text search. (Currently only supported Django's PostgreSQL backend.)
     # '$' Regex search.
 
+# Post Admin
 
-class PostSearch(generics.ListAPIView):
-    permission_classes = [AllowAny]
+
+class CreatePost(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['^slug']
 
+
+class AdminPostDetail(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+
+class EditPost(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+
+
+class DeletePost(generics.RetrieveDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
 # class PostList(viewsets.ModelViewSet):
 #     permission_classes = [IsAuthenticated]
