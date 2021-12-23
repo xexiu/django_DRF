@@ -50,7 +50,6 @@ class PostSearch(generics.ListAPIView):
 
 # Post Admin
 
-
 class CreatePost(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
