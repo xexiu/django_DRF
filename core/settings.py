@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-from pathlib import Path
+import os
 from datetime import timedelta
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,7 +66,7 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
-INTERNAL_IPS = [ # for debug_toolbar
+INTERNAL_IPS = [  #  for debug_toolbar
     '127.0.0.1',
 ]
 
@@ -142,7 +143,7 @@ STATIC_URL = '/static/'
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.AllowAny' # anyone can access the app
+        # 'rest_framework.permissions.AllowAny' # anyone can access the app
         'rest_framework.permissions.IsAuthenticated'
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -151,7 +152,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-################# Permissions:
+# Permissions:
 # AllowAny
 # IsAuthenticated
 # IsAdminUser
@@ -181,3 +182,6 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

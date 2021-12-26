@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['category', 'id', 'title', 'slug', 'author',
+        fields = ['category', 'id', 'title', 'image', 'slug', 'author',
                   'excerpt', 'content', 'status']
 
 
@@ -31,6 +31,22 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Add custom claims
         token['user_name'] = user.user_name
-        print('HEYYY Token from MyTokenObtainPairSerializer',
-              token, 'User', user.email)
+        token['first_name'] = user.first_name
+        token['is_superuser'] = user.is_superuser
+        print('Token from MyTokenObtainPairSerializer', user.email)
         return token
+
+    def validate(self, attrs):
+        print('VALIDATE Token Attrs', attrs)
+        data = super(MyTokenObtainPairSerializer, self).validate(attrs)
+        print('#####################################################')
+        print('VALIDATE Token Data', self)
+
+        data['user'] = {
+            'user_name': self.user.user_name,
+            'id': self.user.id,
+            'first_name': self.user.first_name,
+            'is_superuser': self.user.is_superuser
+        }
+
+        return data

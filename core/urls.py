@@ -6,6 +6,8 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
 from blog_api.views import MyObtainTokenPairView
 from rest_framework.schemas import get_schema_view
 from rest_framework.documentation import include_docs_urls
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('api/token/', MyObtainTokenPairView.as_view(), name='token_obtain_pair'),
@@ -23,3 +25,5 @@ urlpatterns = [
     ), name='openapi-schema'),
     path("__debug__/", include(debug_toolbar.urls))
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

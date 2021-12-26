@@ -1,11 +1,13 @@
 from blog.models import Post
-from django.shortcuts import get_list_or_404, get_object_or_404
-from rest_framework import filters, generics, viewsets
-from rest_framework.permissions import (SAFE_METHODS, AllowAny, BasePermission,
-                                        DjangoModelPermissions, IsAdminUser,
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, generics, status
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import (AllowAny, BasePermission, IsAdminUser,
                                         IsAuthenticated)
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from users.models import NewUser
 
 from .serializers import MyTokenObtainPairSerializer, PostSerializer
 
@@ -40,8 +42,8 @@ class PostSearch(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    ordering_fields = ['title', 'id'] # order by this fields
-    ordering = ['title'] # order by default -> in this case, order by 'title'
+    ordering_fields = ['title', 'id']  # order by this fields
+    ordering = ['title']  #  order by default -> in this case, order by 'title'
     search_fields = ['^slug']
     # '^' Starts-with search.
     # '=' Exact matches.
@@ -50,10 +52,19 @@ class PostSearch(generics.ListAPIView):
 
 # Post Admin
 
-class CreatePost(generics.CreateAPIView):
+
+class CreatePost(APIView):
     permission_classes = [IsAuthenticated]
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, format=None):
+        print(request.data)
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdminPostDetail(generics.RetrieveAPIView):
@@ -125,7 +136,9 @@ class DeletePost(generics.RetrieveDestroyAPIView):
 class MyObtainTokenPairView(TokenObtainPairView):
     permission_classes = [AllowAny]
     serializer_class = MyTokenObtainPairSerializer
-    print('HEYYY Token from MyObtainTokenPairView', serializer_class)
+    data = serializer_class.data
+
+    print('HEYYY Token from MyObtainTokenPairView', data)
 
 
 """
